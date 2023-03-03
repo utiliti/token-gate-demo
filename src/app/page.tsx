@@ -1,91 +1,100 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from './page.module.css'
+"use client";
 
-const inter = Inter({ subsets: ['latin'] })
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
+import { getNFTs } from "./lib/hooks";
 
 export default function Home() {
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [checkingNfts, setCheckingNfts] = useState(false);
+  const [hasNft, setHasNft] = useState(false);
+
+  const { address, isConnected } = useAccount();
+
+  useEffect(() => {
+    if (isConnected) {
+      setIsSignedIn(true);
+      setCheckingNfts(true);
+      getNFTs(address).then((res) => {
+        if (res.length > 0) {
+          setHasNft(true);
+          setCheckingNfts(false);
+        } else {
+          setHasNft(false);
+          setCheckingNfts(false);
+        }
+      });
+    } else {
+      setIsSignedIn(false);
+      setHasNft(false);
+    }
+  }, [isConnected, address]);
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className='max-w-[1600px] mx-auto'>
+      <nav className='flex justify-between items-center text-lg tracking-widest italic my-3 font-semibold'>
+        <div>THE CLUB</div>
+        <div className='flex items-center gap-10'>
+          <div>GALLERY</div>
+          <div className='text-yellow-500'>BATHROOM</div>
+          <div>
+            <ConnectButton />
+          </div>
         </div>
-      </div>
+      </nav>
+      <section className='mt-10'>
+        <>
+          <div className='flex justify-center items-center'>
+            {isSignedIn ? (
+              <>
+                {hasNft ? (
+                  <>
+                    <div className='w-[800px]'>
+                      <iframe
+                        src={
+                          "https://wbo.ophir.dev/boards/the-club-board-19259257097295skljf209fu3o"
+                        }
+                        style={{ width: "800px", height: "800px" }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className='w-[800px] text-center'>
+                      <div className='text-4xl'>
+                        {checkingNfts
+                          ? "CHECKING YOUR WALLET FOR NFT'S"
+                          : "YOU HAVE NO CLUB NFTS"}
+                      </div>
+                      <p className='text-xl'>
+                        You must own The Club NFT to access the Bathroom
+                      </p>
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div className='w-[800px] text-center'>
+                <div className='text-4xl'>CONNECT YOUR WALLET</div>
+                <p className='text-xl'>
+                  You must own The Club NFT to access the Bathroom
+                </p>
+              </div>
+            )}
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-        <div className={styles.thirteen}>
-          <Image src="/thirteen.svg" alt="13" width={40} height={31} priority />
-        </div>
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+            <div>
+              <Image
+                alt='Toilet'
+                src='/toilet.png'
+                width={1000}
+                height={1000}
+              />
+            </div>
+          </div>
+        </>
+      </section>
     </main>
-  )
+  );
 }
